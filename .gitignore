@@ -1,0 +1,8 @@
+# .gitignore
+.env
+.htaccess
+test
+config.js
+config.php
+keys.php
+private/
