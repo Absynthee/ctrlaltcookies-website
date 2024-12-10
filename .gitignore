@@ -1,8 +1,13 @@
 # .gitignore
 .env
 .htaccess
-test
+test*
+*test
 config.js
 config.php
 keys.php
 private/
+*.psd
+styles/bluesky-test.js
+styles/youtube-script-old.js
+styles/youtube-script-copy.js
