@@ -90,3 +90,11 @@ document.addEventListener('DOMContentLoaded', function() {
   // Start the adaptive interval
   updateInterval();
 });
+
+
+// live server testing with .html extensions
+document.querySelectorAll('a').forEach(link => {
+  if (!link.href.endsWith('.html') && !link.href.includes('#')) {
+      link.href = link.href + '.html';
+  }
+});

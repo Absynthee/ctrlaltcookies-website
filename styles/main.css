@@ -12,6 +12,10 @@ notes:
   font-weight: 400, 500, 600, 700, 800;
 }
 
+@view-transition {
+  navigation: auto;
+}
+
 :root {
   color-scheme: light dark;
 }
