@@ -671,6 +671,10 @@ main {
     line-height: 0.5;
   }
 
+  strong.new-channel {
+    font-size: 2.5rem;
+  }
+
   p {
     line-height: 1;
   }
@@ -790,7 +794,7 @@ span.long-name {
 
 /* old style to flip the about image horizontally */
 .about-main-image {
-  /* transform: scaleX(-1); */ 
+  /* transform: scaleX(-1); */
 }
 
 .videos-section {
@@ -1587,10 +1591,12 @@ footer {
     font-size: 1.1rem;
   }
 
-  strong.new-channel {
-    font-size: 2.5rem;
+  .social-card,
+  .support-card {
+    strong.new-channel {
+      font-size: 2.2rem;
+    }
   }
-
   .Video-1-Thumbnail,
   .Video-2-Thumbnail {
     padding-inline: 3px;
