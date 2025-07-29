@@ -1,0 +1,276 @@
+<script>
+  import {
+    getHTMLElement,
+    getInputElement,
+    getTextAreaElement,
+    getButtonElement,
+    addElementEventListener,
+    setElementStyle,
+    toggleElementClass,
+  } from "@/lib/utils";
+
+  // Type definitions
+  type ValidatorFunction = (value: string) => string;
+  type ValidatorMap = Record<string, ValidatorFunction>;
+
+  interface FormResponse {
+    success: boolean;
+    message?: string;
+  }
+
+  // Get DOM elements with proper typing
+  const form = getHTMLElement("#contactForm") as HTMLFormElement;
+  const submitButton = getButtonElement('button[type="submit"]', form);
+  const loadingSpan = getHTMLElement(".loading", submitButton);
+  const submitText = getHTMLElement("p", submitButton);
+  const successMessage = getHTMLElement("#successMessage");
+
+  // Validation functions with proper typing
+  const validators: ValidatorMap = {
+    name: (value: string): string => {
+      const regex = /^[a-zA-Z ]{2,50}$/;
+      return regex.test(value)
+        ? ""
+        : "Please enter a valid name (2-50 characters, letters only)";
+    },
+    email: (value: string): string => {
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return regex.test(value) ? "" : "Please enter a valid email address";
+    },
+    subject: (value: string): string => {
+      return value.length >= 2 && value.length <= 100
+        ? ""
+        : "Subject must be between 2 and 100 characters";
+    },
+    message: (value: string): string => {
+      return value.length >= 10 && value.length <= 1000
+        ? ""
+        : "Message must be between 10 and 1000 characters";
+    },
+  };
+
+  // Real-time validation
+  if (form) {
+    const formFields = form.querySelectorAll("input, textarea") as NodeListOf<
+      HTMLInputElement | HTMLTextAreaElement
+    >;
+
+    formFields.forEach((field: HTMLInputElement | HTMLTextAreaElement) => {
+      addElementEventListener(field, "input", () => {
+        const fieldId = field.id;
+        if (validators[fieldId]) {
+          const errorMsg = validators[fieldId](field.value);
+          const errorDiv = field.nextElementSibling as HTMLElement;
+
+          if (errorDiv) {
+            errorDiv.textContent = errorMsg;
+          }
+
+          toggleElementClass(field, "invalid", errorMsg !== "");
+        }
+      });
+    });
+  }
+
+  // Form submission
+  if (form) {
+    addElementEventListener(form, "submit", async (e: SubmitEvent) => {
+      e.preventDefault();
+
+      // Hide success message if it's visible from a previous submission
+      if (successMessage) {
+        setElementStyle(successMessage, "display", "none");
+      }
+
+      // Check if botcheck is checked (spam protection)
+      const botcheck = getInputElement("#botcheck");
+      if (botcheck?.checked) {
+        return;
+      }
+
+      // Validate all fields
+      let isValid = true;
+      for (const [fieldId, validator] of Object.entries(validators)) {
+        const field = getHTMLElement(`#${fieldId}`, form) as
+          | HTMLInputElement
+          | HTMLTextAreaElement;
+
+        if (field) {
+          const errorMsg = validator(field.value);
+          const errorDiv = field.nextElementSibling as HTMLElement;
+
+          if (errorDiv) {
+            errorDiv.textContent = errorMsg;
+          }
+
+          toggleElementClass(field, "invalid", errorMsg !== "");
+
+          if (errorMsg) isValid = false;
+        }
+      }
+
+      if (!isValid) return;
+
+      // Update button state
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+
+      if (loadingSpan) {
+        setElementStyle(loadingSpan, "display", "inline");
+      }
+
+      if (submitText) {
+        setElementStyle(submitText, "display", "none");
+      }
+
+      try {
+        const formData = new FormData(form);
+        const response = await fetch(form.action, {
+          method: "POST",
+          body: formData,
+        });
+
+        const data: FormResponse = await response.json();
+
+        if (data.success) {
+          // Show success message
+          if (successMessage) {
+            setElementStyle(successMessage, "display", "block");
+          }
+
+          // Reset form
+          form.reset();
+
+          // Scroll success message into view
+          successMessage?.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+          });
+        } else {
+          throw new Error(data.message || "Form submission failed");
+        }
+      } catch (error: unknown) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error occurred";
+        alert("Error submitting form: " + errorMessage);
+      } finally {
+        // Reset button state
+        if (submitButton) {
+          submitButton.disabled = false;
+        }
+
+        if (loadingSpan) {
+          setElementStyle(loadingSpan, "display", "none");
+        }
+
+        if (submitText) {
+          setElementStyle(submitText, "display", "block");
+        }
+      }
+    });
+  }
+</script>
+
+<section id="contact" class="contact-section" aria-labelledby="contact-title">
+  <div class="contact-container">
+    <img
+      class="emoji mushroom"
+      src="src/assets/images/emotes/cookie-mushrookie.png"
+      alt=""
+    />
+    <img
+      class="emoji salty"
+      src="src/assets/images/emotes/cookie-salty.png"
+      alt=""
+    />
+    <h2 id="contact-title">
+      Contact <span class="text-gradient">Cookie</span>
+    </h2>
+    <p>Please allow one week for response for all business enquiries.</p>
+
+    <form
+      id="contactForm"
+      action="https://api.web3forms.com/submit"
+      method="POST"
+    >
+      <input
+        type="hidden"
+        name="access_key"
+        value="c1b3afac-2df0-498e-aac2-9600ef55605b"
+      />
+      <input type="hidden" name="from_name" value="Cookie's Website Form" />
+
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          pattern="^[a-zA-Z ]{2,50}$"
+          placeholder="Enter your name"
+          required
+          autocomplete="name"
+        />
+        <div class="error-message"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="Enter your email"
+          required
+          autocomplete="email"
+        />
+        <div class="error-message"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="subject">Subject:</label>
+        <input
+          type="text"
+          id="subject"
+          name="subject"
+          minlength="2"
+          maxlength="100"
+          placeholder="Enter subject"
+          required
+        />
+        <div class="error-message"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="message">Message:</label>
+        <textarea
+          id="message"
+          name="message"
+          minlength="10"
+          maxlength="1000"
+          placeholder="Enter your message"
+          required></textarea>
+        <div class="error-message"></div>
+      </div>
+
+      <!-- Honeypot field to prevent spam -->
+      <input
+        type="checkbox"
+        name="botcheck"
+        id="botcheck"
+        class="hidden"
+        style="display: none;"
+      />
+
+      <button class="long" type="submit">
+        <p>Send Message</p>
+        <span class="loading" style="display: none;">Sending...</span>
+      </button>
+    </form>
+
+    <div id="successMessage" class="success-message">
+      Thank you for your message! We'll get back to you soon.
+    </div>
+  </div>
+</section>

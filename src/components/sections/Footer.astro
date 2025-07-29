@@ -1,0 +1,71 @@
+---
+import { navigation, isActive } from "../../lib/navigation";
+import type { FooterNavItem } from "../../lib/navigation";
+
+// Get current path for active state
+const currentPath = Astro.url.pathname;
+
+const footerNavLinks = navigation.footer;
+---
+
+<footer>
+  <div class="footer-section">
+    <div class="footer-info">
+      <span>CtrlAltCookie</span>
+      <em>Fast talking degenerate bunnui on the internet</em>
+    </div>
+
+    <nav class="footer-nav" aria-label="Footer navigation">
+      {
+        footerNavLinks.map((item: FooterNavItem) => (
+          <a
+            href={item.path}
+            class={`nav-link ${isActive(item.path, currentPath) ? "active" : ""}`}
+            aria-label={item.ariaLabel}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="icons">
+      <div class="icon">
+        <a href="https://www.youtube.com/@ctrlaltcookie" target="_blank"
+          ><img src="src/assets/images/icons/icon-7.png" alt="facebook" /></a
+        >
+      </div>
+      <div class="icon">
+        <a href="https://www.twitch.tv/ctrlaltcookie" target="_blank"
+          ><img src="src/assets/images/icons/icon-4.png" alt="instagram" /></a
+        >
+      </div>
+      <div class="icon">
+        <a href="https://discord.gg/QFJVSjjuj4" target="_blank"
+          ><img src="src/assets/images/icons/icon-5.png" alt="discord" /></a
+        >
+      </div>
+
+      <div class="icon">
+        <a href="https://bsky.app/profile/ctrlaltcookie.com" target="_blank"
+          ><img src="src/assets/images/icons/icon-16.png" alt="bluesky" /></a
+        >
+      </div>
+    </div>
+
+    <div class="support-links">
+      Support me on <a
+        href="https://www.patreon.com/funnuibunnui"
+        target="_blank">Patreon</a
+      > or
+      <a href="https://ko-fi.com/ctrlaltcookie" target="_blank">Ko-fi</a>
+    </div>
+
+    <p class="copyright">
+      &copy; {new Date().getFullYear()}
+      <a href="/#">CtrlAltCookie</a> &
+      <a href="https://www.kittycodecreative.com/">KittyCode Creative</a>. All
+      rights reserved.
+    </p>
+  </div>
+</footer>

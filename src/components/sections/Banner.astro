@@ -1,0 +1,86 @@
+<script>
+  import {
+    getHTMLElement,
+    addElementClass,
+    removeElementClass,
+  } from "@/lib/utils";
+
+  // Type definitions
+  interface StreamStatusResponse {
+    is_live: boolean;
+    error: boolean;
+    message?: string;
+    cached?: boolean;
+  }
+
+  // Twitch stream status checker
+  document.addEventListener("DOMContentLoaded", () => {
+    const checkStreamStatus = async (): Promise<void> => {
+      try {
+        const response = await fetch("/.netlify/functions/check-stream", {
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+
+        const data: StreamStatusResponse = await response.json();
+
+        if (data.error) {
+          console.error("Error checking stream status:", data.message);
+          return;
+        }
+
+        const banner = getHTMLElement(".top-banner");
+        if (banner) {
+          if (data.is_live) {
+            addElementClass(banner, "is-live");
+          } else {
+            removeElementClass(banner, "is-live");
+          }
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    // Function to determine check interval based on UK time
+    const getCheckInterval = (): number => {
+      const ukTime = new Date().toLocaleString("en-US", {
+        timeZone: "Europe/London",
+      });
+      const ukHour = new Date(ukTime).getHours();
+
+      // Return 5 minutes (300000ms) for off-peak hours, 2 minutes (120000ms) for peak hours
+      return ukHour >= 21 || ukHour < 6 ? 300000 : 120000;
+    };
+
+    // Initial check
+    checkStreamStatus();
+
+    // Set up adaptive interval checking
+    const updateInterval = (): void => {
+      const interval = getCheckInterval();
+      checkStreamStatus();
+      setTimeout(updateInterval, interval);
+    };
+
+    // Start the adaptive interval
+    updateInterval();
+  });
+</script>
+
+<div class="top-banner">
+  <a
+    href="https://www.twitch.tv/ctrlaltcookie"
+    target="_blank"
+    class="top-banner-content"
+  >
+    <img src="src/assets/images/emotes/bunnui.png" alt="Bunnui emoji" /> Cookie is
+    currently streaming <img
+      src="src/assets/images/emotes/bunnui.png"
+      alt="Bunnui emoji"
+    /></a
+  >
+</div>
