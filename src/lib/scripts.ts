@@ -37,3 +37,26 @@ document.addEventListener("DOMContentLoaded", (): void => {
     });
   });
 });
+
+// Line clamp functionality
+function clampText(element: HTMLElement, maxLines: number): void {
+  const lineHeight = parseInt(window.getComputedStyle(element).lineHeight);
+  const maxHeight = lineHeight * maxLines;
+
+  let content = element.getAttribute("data-original-text");
+  if (!content) {
+    content = element.textContent || "";
+    element.setAttribute("data-original-text", content);
+  }
+
+  element.textContent = content;
+  while (element.scrollHeight > maxHeight) {
+    content = content.slice(0, -1);
+    element.textContent = content + "...";
+  }
+}
+
+function applyClampToElements(): void {
+  const containers = getHTMLElements(".clamp-text");
+  containers.forEach((container) => clampText(container, 4));
+}
