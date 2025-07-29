@@ -25,26 +25,26 @@ interface SocialItem {
 
 // Main navigation items
 const mainLinks: NavItem[] = [
+  // {
+  //   label: "Home",
+  //   path: "/#",
+  //   ariaLabel: "Go to Home",
+  // },
   {
-    label: "Home",
-    path: "/#",
-    ariaLabel: "Go to Home",
+    label: "About",
+    path: "/#about",
+    ariaLabel: "Learn more about me",
   },
-  // {
-  //   label: "Projects",
-  //   path: "/#projects",
-  //   ariaLabel: "View all projects",
-  // },
-  // {
-  //   label: "About",
-  //   path: "/#about",
-  //   ariaLabel: "Learn more about me",
-  // },
-  // {
-  //   label: "Contact",
-  //   path: "/#contact",
-  //   ariaLabel: "Contact me",
-  // },
+  {
+    label: "Contact",
+    path: "/#contact",
+    ariaLabel: "Contact me",
+  },
+  {
+    label: "Fan Art",
+    path: "/fan-art",
+    ariaLabel: "View fan art",
+  },
 ];
 
 // Footer navigation links
@@ -54,53 +54,48 @@ const footerLinks: FooterNavItem[] = [
     path: "/#",
     ariaLabel: "Go to Home",
   },
-  // {
-  //   label: "Projects",
-  //   path: "/#projects",
-  //   ariaLabel: "View all projects",
-  // },
-  // {
-  //   label: "About",
-  //   path: "/#about",
-  //   ariaLabel: "Learn more about me",
-  // },
-  // {
-  //   label: "Contact",
-  //   path: "/#contact",
-  //   ariaLabel: "Contact me",
-  // },
-  // {
-  //   label: "Components",
-  //   path: "/components",
-  //   ariaLabel: "View reusable components",
-  // },
+  {
+    label: "About",
+    path: "/#about",
+    ariaLabel: "Learn more about me",
+  },
+  {
+    label: "Contact",
+    path: "/#contact",
+    ariaLabel: "Contact me",
+  },
+  {
+    label: "Fan Art",
+    path: "/fan-art",
+    ariaLabel: "View fan art",
+  },
 ];
 
 // Footer social links (@lucide/astro icons)
 const socialLinks: SocialItem[] = [
   {
-    label: "GitHub",
-    path: "https://github.com/absynthee",
-    icon: "github",
-    ariaLabel: "View my GitHub profile",
+    label: "Youtube",
+    path: "https://www.youtube.com/@ctrlaltcookie",
+    icon: "youtube",
+    ariaLabel: "View my Youtube channel",
   },
   {
-    label: "LinkedIn",
-    path: "https://linkedin.com/in/ASpillman",
-    icon: "linkedin",
-    ariaLabel: "Connect with me on LinkedIn",
+    label: "Twitch",
+    path: "https://www.twitch.tv/ctrlaltcookie",
+    icon: "twitch",
+    ariaLabel: "Watch me live on Twitch",
   },
+  // {
+  //   label: "Discord",
+  //   path: "https://behance.net/austinspillman",
+  //   icon: "behance",
+  //   ariaLabel: "Join my Discord server",
+  // },
   {
-    label: "Behance",
-    path: "https://behance.net/austinspillman",
-    icon: "behance",
-    ariaLabel: "View my work on Behance",
-  },
-  {
-    label: "Email",
-    path: "mailto:austinspillman@gmail.com",
-    icon: "email",
-    ariaLabel: "Send me an email",
+    label: "Bluesky",
+    path: "https://bsky.app/profile/ctrlaltcookie.com",
+    icon: "bluesky",
+    ariaLabel: "Connect with me on Bluesky",
   },
 ];
 

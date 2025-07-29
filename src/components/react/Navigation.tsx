@@ -1,25 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
-import { navigation, isActive } from "../../lib/navigation";
-import type { NavItem, SocialNavItem } from "../../lib/navigation";
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      "lord-icon": React.DetailedHTMLProps<
-        React.HTMLAttributes<HTMLElement>,
-        HTMLElement
-      > & {
-        id?: string;
-        src?: string;
-        trigger?: string;
-        stroke?: string;
-        colors?: string;
-        state?: string;
-        loading?: string;
-      };
-    }
-  }
-}
+import React, { useState, useEffect } from "react";
+import { navigation, isActive } from "@/lib/navigation";
+import type { NavItem } from "@/lib/navigation";
 
 interface NavigationProps {
   currentPath: string;
@@ -30,8 +11,6 @@ function Navigation({ currentPath }: NavigationProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
-  const navRef = useRef<HTMLDivElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   // Initialize theme
   useEffect(() => {
@@ -60,7 +39,7 @@ function Navigation({ currentPath }: NavigationProps) {
       mediaQuery.removeEventListener("change", handleSystemThemeChange);
   }, []);
 
-  // Auto-hide on scroll (mobile only)
+  // Auto-hide on scroll
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -88,120 +67,6 @@ function Navigation({ currentPath }: NavigationProps) {
     setIsMobileMenuOpen(false);
   }, [currentPath]);
 
-  // Handle click outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        isMobileMenuOpen &&
-        navRef.current &&
-        !navRef.current.contains(event.target as Node)
-      ) {
-        setIsMobileMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isMobileMenuOpen]);
-
-  // Handle touch gestures
-  useEffect(() => {
-    if (!menuRef.current) return;
-
-    let startX = 0;
-
-    const handleTouchStart = (e: TouchEvent) => {
-      startX = e.touches[0].clientX;
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!isMobileMenuOpen) return;
-
-      const currentX = e.touches[0].clientX;
-      const diffX = startX - currentX;
-
-      if (diffX > 50) {
-        setIsMobileMenuOpen(false);
-      }
-    };
-
-    const menuElement = menuRef.current;
-    menuElement.addEventListener("touchstart", handleTouchStart);
-    menuElement.addEventListener("touchmove", handleTouchMove);
-
-    return () => {
-      menuElement.removeEventListener("touchstart", handleTouchStart);
-      menuElement.removeEventListener("touchmove", handleTouchMove);
-    };
-  }, [isMobileMenuOpen]);
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsMobileMenuOpen(false);
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
-  // Icon animations setup
-  useEffect(() => {
-    const setupIconAnimations = () => {
-      const githubIcon = document.getElementById("icon-github");
-      const linkedinIcon = document.getElementById("icon-linkedin");
-      const iconCollection = [githubIcon, linkedinIcon];
-
-      iconCollection.forEach((icon) => {
-        if (icon) {
-          let isReady = false;
-          let hasRevealed = false;
-
-          const revealObserver = new IntersectionObserver(
-            (entries) => {
-              entries.forEach((entry) => {
-                if (entry.isIntersecting && !hasRevealed) {
-                  hasRevealed = true;
-                  if (isReady) {
-                    triggerRevealAnimation();
-                  }
-                  revealObserver.unobserve(icon);
-                }
-              });
-            },
-            { threshold: 0.1, rootMargin: "50px" }
-          );
-
-          revealObserver.observe(icon);
-
-          icon.addEventListener("ready", () => {
-            isReady = true;
-            if (hasRevealed) {
-              triggerRevealAnimation();
-            }
-          });
-
-          icon.addEventListener("mouseenter", () => {
-            if (isReady) {
-              (icon as any).playerInstance.state = "hover-pinch";
-              (icon as any).playerInstance.playFromBeginning();
-            }
-          });
-
-          function triggerRevealAnimation() {
-            if (icon && (icon as any).playerInstance) {
-              (icon as any).playerInstance.state = "in-reveal";
-              (icon as any).playerInstance.playFromBeginning();
-            }
-          }
-        }
-      });
-    };
-
-    const timer = setTimeout(setupIconAnimations, 100);
-    return () => clearTimeout(timer);
-  }, []);
-
   const applyTheme = (dark: boolean) => {
     const root = document.documentElement;
     if (dark) {
@@ -215,23 +80,7 @@ function Navigation({ currentPath }: NavigationProps) {
     const newIsDark = !isDark;
     setIsDark(newIsDark);
     localStorage.setItem("theme", newIsDark ? "dark" : "light");
-
-    if (!document.startViewTransition) {
-      applyTheme(newIsDark);
-      return;
-    }
-
-    const x = window.innerWidth / 2;
-    const y = window.innerHeight / 2;
-
-    const transition = document.startViewTransition(() => {
-      applyTheme(newIsDark);
-    });
-
-    transition.ready.then(() => {
-      document.documentElement.style.setProperty("--x", `${x}px`);
-      document.documentElement.style.setProperty("--y", `${y}px`);
-    });
+    applyTheme(newIsDark);
   };
 
   const checkIsActive = (path: string) => {
@@ -239,459 +88,289 @@ function Navigation({ currentPath }: NavigationProps) {
   };
 
   return (
-    <nav
-      ref={navRef}
-      className={`navigation ${isVisible ? "visible" : "hidden"} ${
-        isMobileMenuOpen ? "menu-open" : ""
-      }`}
-    >
-      {/* Hamburger Button (mobile only) */}
-      <button
-        className={`hamburger ${isMobileMenuOpen ? "open" : ""}`}
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        aria-label="Toggle menu"
-        aria-expanded={isMobileMenuOpen}
-      >
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+    <nav className={`${isVisible ? "nav-visible" : "nav-hidden"}`}>
+      <div className="logo">
+        <img src="src/assets/images/slime-bunny.png" alt="Cookie's logo" />
+        <a href="/#">CtrlAltCookie</a>
+      </div>
 
-      {/* Mobile Overlay */}
-      {isMobileMenuOpen && (
-        <div className="overlay" onClick={() => setIsMobileMenuOpen(false)} />
-      )}
-
-      {/* Main Navigation Content */}
-      <div
-        ref={menuRef}
-        className="nav-content"
-        style={{ visibility: isVisible ? "visible" : "hidden" }}
-      >
-        <div className="main-nav">
-          {navigation.main.map((item: NavItem) => (
+      <ul className={`nav-links ${isMobileMenuOpen ? "nav-active" : ""}`}>
+        {navigation.main.map((item: NavItem, index: number) => (
+          <li
+            key={item.path}
+            style={{
+              transitionDelay: isMobileMenuOpen ? `${index * 0.1}s` : "0s",
+            }}
+          >
             <a
-              key={item.path}
               href={item.path}
-              className={`nav-link ${checkIsActive(item.path) ? "active" : ""}`}
+              className={checkIsActive(item.path) ? "active" : ""}
               aria-label={item.ariaLabel}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               {item.label}
             </a>
-          ))}
-        </div>
+          </li>
+        ))}
+        <li className="toggle-theme" onClick={handleThemeToggle}>
+          <svg className="sun-icon" viewBox="0 0 24 24">
+            <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM12 21.75a.75.75 0 01-.75-.75v-2.25a.75.75 0 011.5 0V21a.75.75 0 01-.75.75zM3 12a.75.75 0 01.75-.75h2.25a.75.75 0 010 1.5H3.75A.75.75 0 013 12zM21 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5h2.25A.75.75 0 0121 12zM5.47 5.47a.75.75 0 011.06 0l1.59 1.59a.75.75 0 01-1.06 1.06L5.47 6.53a.75.75 0 010-1.06zM18.53 5.47a.75.75 0 010 1.06l-1.59 1.59a.75.75 0 01-1.06-1.06l1.59-1.59a.75.75 0 011.06 0zM5.47 18.53a.75.75 0 010-1.06l1.59-1.59a.75.75 0 111.06 1.06l-1.59 1.59a.75.75 0 01-1.06 0zM18.53 18.53a.75.75 0 01-1.06 0l-1.59-1.59a.75.75 0 011.06-1.06l1.59 1.59a.75.75 0 010 1.06z" />
+          </svg>
+          <svg className="moon-icon" viewBox="0 0 24 24">
+            <path d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+          </svg>
+        </li>
+      </ul>
 
-        <div className="social-nav">
-          {/* {navigation.social.map((item: SocialNavItem) => (
-            <a
-              key={item.path}
-              href={item.path}
-              className="social-link"
-              aria-label={item.ariaLabel}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <lord-icon
-                id={`icon-${item.icon}`}
-                src={item.lordicon.src}
-                trigger={item.lordicon.trigger}
-                stroke={item.lordicon.stroke}
-                colors={item.lordicon.colors}
-                state={item.lordicon.state}
-                loading={item.lordicon.loading}
-              />
-              <span className="sr-only">{item.label}</span>
-            </a>
-          ))} */}
-
-          <label htmlFor="theme-toggle" className="toggle">
-            <input
-              id="theme-toggle"
-              type="checkbox"
-              checked={isDark}
-              onChange={handleThemeToggle}
-            />
-            <div></div>
-          </label>
-        </div>
-
-        <div className="mobile-theme-section">
-          <span>Theme</span>
-          <label htmlFor="theme-toggle" className="mobile-toggle">
-            <input
-              id="theme-toggle"
-              type="checkbox"
-              checked={isDark}
-              onChange={handleThemeToggle}
-            />
-            <div></div>
-          </label>
-        </div>
+      <div
+        className={`burger ${isMobileMenuOpen ? "toggle" : ""}`}
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+      >
+        <div className="line1"></div>
+        <div className="line2"></div>
+        <div className="line3"></div>
       </div>
 
       <style>{`
-        /* Base Navigation */
-        .navigation {
-          position: fixed;
-          top: 2rem;
-          left: 50%;
-          transform: translateX(-50%);
-          z-index: 1000;
-          transition: transform 0.3s ease;
-          // max-width: 720px;
-          margin: 0 auto;
+        @keyframes navLinkFade {
+          from {
+            opacity: 0;
+            transform: translateX(3.125rem);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
         }
 
-        .navigation.hidden {
-          transform: translateX(-50%) translateY(-100px);
-        }
-
-        /* Hamburger (hidden on desktop) */
-        .hamburger {
-          display: none;
-          flex-direction: column;
-          justify-content: space-around;
-          width: 44px;
-          height: 44px;
-          background: hsl(from var(--card) h s l / 0.15);
-          backdrop-filter: blur(8px);
-          border: none;
-          border-radius: 12px;
-          cursor: pointer;
-          padding: 8px;
-          transition: all 0.3s ease;
+        nav {
           position: relative;
-          z-index: 5;
-        }
-
-        .hamburger span {
-          width: 100%;
-          height: 3px;
-          background: var(--foreground);
-          border-radius: 3px;
-          transition: all 0.3s ease;
-          transform-origin: center;
-        }
-
-        .hamburger.open span:nth-child(1) {
-          transform: rotate(45deg) translate(7px, 7px);
-        }
-
-        .hamburger.open span:nth-child(2) {
-          opacity: 0;
-          transform: scale(0);
-        }
-
-        .hamburger.open span:nth-child(3) {
-          transform: rotate(-45deg) translate(7px, -6px);
-        }
-
-        /* Desktop Navigation Content */
-        .nav-content {
+          max-width: 1920px;
+          margin: 0 auto;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 0.5rem 1rem;
-          border: 1px solid hsl(from var(--border) h s l / 0.1);
-          border-radius: 2rem;
-          background: hsl(from var(--card) h s l / 0.5);
-          backdrop-filter: blur(12px);
-          box-shadow: 0 0 100px -10px rgb(226, 40, 40, 0.5);
-          gap: var(--space-3xl);
+          height: 100px;
+          padding: 0 1.25rem;
+          color: light-dark(var(--color-1), var(--color-2));
+          transition: transform 0.3s ease;
         }
 
-        .main-nav {
+        nav.nav-hidden {
+          transform: translateY(-100%);
+        }
+
+        nav.nav-visible {
+          transform: translateY(0);
+        }
+
+        .logo {
           display: flex;
-          gap: var(--space-m);
-          margin-inline: var(--space-s);
+          align-items: center;
         }
 
-        .nav-link {
-          color: hsl(from var(--foreground) h s l / 0.7);
+        .logo img {
+          margin-inline-end: 1rem;
+          max-width: 72px;
+          max-height: 72px;
+          transition: 0.3s ease;
+          cursor: pointer;
+        }
+
+        .logo img:hover {
+          scale: 1.1;
+        }
+
+        .logo a {
           text-decoration: none;
-          font-weight: 500;
-          transition: all 0.2s ease;
-          padding: 0.25rem 1rem;
-          border-radius: var(--radius);
-          position: relative;
+          font-size: 2rem;
+          font-weight: 700;
+          transition: all 0.3s ease;
+          background: -webkit-linear-gradient(
+            0deg,
+            rgb(131, 63, 187),
+            rgb(219, 121, 213)
+          );
+          background-clip: text;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
         }
 
-  .nav-link:hover {
-    color: var(--Red);
-    background: hsl(from var(--Red) h s l / 0.1);
-  }
-
-  .nav-link.active {
-    color: var(--Red);
-    font-weight: 600;
-  }
-
-  .nav-link:focus-visible {
-    outline: 2px solid var(--Red);
-    outline-offset: 2px;
-  }
-
-        .social-nav {
+        .nav-links {
           display: flex;
-          gap: var(--space-s);
-          margin-inline: var(--space-3xs);
+          justify-content: end;
+          align-items: center;
+          gap: 25px;
         }
 
-        .social-link {
-          display: inline-flex;
+        .nav-links li {
+          list-style: none;
+        }
+
+        .nav-links a {
+          color: var(--foreground);
+          text-decoration: none;
+          font-size: 1rem;
+          font-weight: 500;
+          padding: 0.875rem 0.625rem;
+          transition: all 0.3s ease-out;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+          color: var(--color-3);
+          transform: rotateX(-25deg);
+        }
+
+        .nav-links li:nth-child(2) a:hover,
+        .nav-links li:nth-child(2) a.active {
+          transform: rotateX(15deg);
+        }
+
+        .nav-links li:nth-child(3) a:hover,
+        .nav-links li:nth-child(3) a.active {
+          transform: rotate(-15deg);
+        }
+
+        .nav-links li:nth-child(4) a:hover,
+        .nav-links li:nth-child(4) a.active {
+          transform: rotate(10deg);
+        }
+
+        .toggle-theme {
+          cursor: pointer;
+          display: flex;
           align-items: center;
           justify-content: center;
-        }
-
-        .mobile-theme-section {
-          display: none;
-        }
-
-        .overlay {
-          display: none;
-        }
-
-        /* Utility Classes */
-        .sr-only {
-          position: absolute;
-          width: 1px;
-          height: 1px;
-          padding: 0;
-          margin: -1px;
-          overflow: hidden;
-          clip: rect(0, 0, 0, 0);
-          white-space: nowrap;
-          border: 0;
-        }
-
-        /* Theme Toggle */
-        .toggle, .mobile-toggle {
-          transform: scale(0.66);
-          transform-origin: center;
-          cursor: pointer;
-          z-index: 10;
-          transition: 0.5s ease all;
-        }
-
-        .toggle:hover, .mobile-toggle:hover {
-          transform: scale(0.55) rotate(45deg);
-          transition: 0.5s ease all;
-        }
-
-        .toggle input, .mobile-toggle input {
-          display: none;
-        }
-
-        .toggle input + div, .mobile-toggle input + div {
-          border-radius: 50%;
-          width: 36px;
-          height: 36px;
-          position: relative;
-          box-shadow: inset 12px -12px 0 0 var(--toggle-color);
-          transform: scale(1) rotate(-2deg);
-          transition: box-shadow 0.5s ease 0s, transform 0.4s ease 0.1s;
-        }
-
-        .toggle input + div:before, .mobile-toggle input + div:before {
-          content: "";
-          width: inherit;
-          height: inherit;
-          border-radius: inherit;
-          position: absolute;
-          left: 0;
-          top: 0;
-          background: light-dark(transparent, var(--toggle-color));
-          transition: background 0.3s ease;
-        }
-
-        .toggle input + div:after, .mobile-toggle input + div:after {
-          content: "";
-          width: 4px;
-          height: 4px;
-          margin: -2px 0 0 -4px;
-          width: 4px;
-          border-radius: 50%;
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          box-shadow:
-            1px -22px 0 var(--toggle-color),
-            1px 23px 0 var(--toggle-color),
-            23px 0 0 var(--toggle-color),
-            -21px 0 0 var(--toggle-color),
-            17px 15px 0 var(--toggle-color),
-            -15px 15px 0 var(--toggle-color),
-            17px -15px 0 var(--toggle-color),
-            -15px -15px 0 var(--toggle-color);
-          transform: scale(0);
+          width: 40px;
+          height: 40px;
+          padding: 8px;
           transition: all 0.3s ease;
         }
 
-        .toggle input:checked + div, .mobile-toggle input:checked + div {
-          box-shadow: inset 32px -32px 0 0 var(--background-color);
-          transform: scale(0.5) rotate(0deg);
-          transition: transform 0.3s ease 0.1s, box-shadow 0.2s ease 0s;
+        .toggle-theme:hover {
+          transform: scale(1.1);
         }
 
-        .toggle input:checked + div:before, .mobile-toggle input:checked + div:before {
-          background: var(--toggle-color);
-          transition: background 0.3s ease 0.1s;
+        .toggle-theme svg {
+          width: 24px;
+          height: 24px;
+          fill: currentColor;
+          transition: all 0.3s ease;
         }
 
-        .toggle input:checked + div:after, .mobile-toggle input:checked + div:after {
-          transform: scale(1.5);
-          transition: transform 0.5s ease 0.15s;
+        .sun-icon {
+          display: block;
         }
 
-        .nav-link:focus-visible {
-          outline: 2px solid var(--Red);
-          outline-offset: 2px;
-}
+        .moon-icon {
+          display: none;
+        }
 
-        .hamburger:focus-visible {
-          outline: 2px solid var(--Red);
-          outline-offset: 2px;
-}
+        :global(.dark) .sun-icon {
+          display: none;
+        }
 
-        .social-link:focus-visible {
-          outline: 2px solid var(--Red);
-          outline-offset: 2px;
-}
+        :global(.dark) .moon-icon {
+          display: block;
+        }
 
-    @keyframes reveal-in {
-      from {
-        clip-path: circle(0% at var(--x) var(--y));
-      }
-      to {
-        clip-path: circle(150% at var(--x) var(--y));
-      }
-    }
+        .burger {
+          display: none;
+          cursor: pointer;
+        }
 
-    @keyframes reveal-out {
-      from {
-        clip-path: circle(150% at var(--x) var(--y));
-      }
-      to {
-        clip-path: circle(0% at var(--x) var(--y));
-      }
-    }
+        .burger div {
+          width: 30px;
+          height: 4px;
+          margin: 5px;
+          background-color: var(--color-3, var(--foreground));
+          transition: all 0.3s ease-out;
+          border-radius: 10px;
+        }
 
-        /* Mobile Responsive */
-        @media screen and (max-width: 768px) {
-          .navigation {
-            top: 1rem;
-            right: 1rem;
-            left: auto;
-            transform: none;
+        .nav-active {
+          transform: translateX(0%);
+        }
+
+        .nav-active li {
+          opacity: 1;
+          transform: translateX(0);
+        }
+
+        .toggle .line1 {
+          transform: rotate(-45deg) translate(-0.3125rem, 0.375rem);
+        }
+
+        .toggle .line2 {
+          opacity: 0;
+        }
+
+        .toggle .line3 {
+          transform: rotate(45deg) translate(-0.3125rem, -0.375rem);
+        }
+
+        @media screen and (max-width: 550px) {
+          .logo {
+            width: 64px;
           }
 
-          .navigation.hidden {
-            transform: translateY(-100px);
+          .logo a {
+            font-size: 1.4rem;
+          }
+        }
+
+        @media screen and (max-width: 880px) {
+          nav {
+            overflow-x: clip;
+            z-index: 998;
           }
 
-          .hamburger {
+          .nav-links {
+            position: absolute;
             display: flex;
-          }
-
-          .hamburger:hover {
-            transform: scale(1.05);
-          }
-
-          .nav-content {
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 300px;
-            max-width: 90vw;
-            height: 100vh;
-            background: hsl(from var(--background) h s l / 0.8);
-            backdrop-filter: blur(12px);
-            border-left: 1px solid hsl(from var(--card) h s l / 0.2);
-            border-radius: 0;
-            transform: translateX(100%);
-            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             flex-direction: column;
-            padding: 6rem 2rem 2rem;
-            gap: var(--space-2xl);
-            overflow-y: auto;
-            box-shadow: none;
+            justify-content: center;
+            right: 0;
+            top: 100px;
+            height: 100%;
+            min-height: 300px;
+            width: 33%;
+            min-width: 300px;
+            gap: 15%;
+            background-color: var(--color-4, var(--card));
+            transform: translateX(150%);
+            transition: transform 0.5s ease-out;
+            z-index: 999;
           }
 
-          .menu-open .nav-content {
+          .nav-active {
             transform: translateX(0);
           }
 
-          .main-nav {
-      flex-direction: column;
-      align-items: center;
-      gap: var(--space-m);
+          .nav-links li {
+            opacity: 0;
+            transform: translateX(100%);
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
           }
 
-          .nav-link {
-            font-size: var(--step-0);
-            padding: 0.25rem 2rem;
-            border-bottom: 1px solid transparent;
-            position: relative;
+          .nav-active li {
+            animation: navLinkFade 0.5s ease forwards;
           }
 
-          .nav-link:hover {
-            border-bottom-color: var(--Red);
+          .nav-links a {
+            padding: 0.625rem;
+            font-size: 1.2rem;
           }
 
-          .nav-link.active::before {
-            content: '';
-            position: absolute;
-            left: -1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 4px;
-            height: 2rem;
-            background: var(--Red);
-            border-radius: 2px;
+          .nav-links a:hover,
+          .nav-links a.active {
+            color: wheat;
+            transform: none;
           }
 
-          .social-nav {
-          display: none;
-          visibility: hidden;
-            flex-direction: row;
-            justify-content: center;
-            gap: 1rem;
-          }
-
-          .toggle {
-            display: none;
-          }
-
-          .mobile-theme-section {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 2rem 0;
-            border-top: 1px solid hsl(from var(--card) h s l / 1);
-            margin-top: auto;
-            width: 70%;
-          }
-
-          .overlay {
+          .burger {
             display: block;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.3s ease;
-          }
-
-          lord-icon {
-            width: 48px;  
-            height: 48px;
-          }
-
-          @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
           }
         }
       `}</style>

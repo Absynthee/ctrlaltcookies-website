@@ -1,0 +1,273 @@
+<script>
+  import {
+    getHTMLElement,
+    getImageElement,
+    setElementStyle,
+    addElementClass,
+  } from "@/lib/utils";
+
+  // Type definitions
+  interface VideoThumbnails {
+    maxres?: { url: string };
+    high?: { url: string };
+    medium?: { url: string };
+  }
+
+  interface VideoSnippet {
+    title: string;
+    description: string;
+    thumbnails: VideoThumbnails;
+    resourceId?: { videoId: string };
+  }
+
+  interface YouTubeVideo {
+    id: string;
+    snippet: VideoSnippet;
+  }
+
+  interface YouTubeAPIItem {
+    snippet: VideoSnippet;
+  }
+
+  interface YouTubeAPIResponse {
+    items?: YouTubeAPIItem[];
+    error?: boolean;
+    message?: string;
+  }
+
+  // Global state
+  let hasRun = false;
+  const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
+
+  function updateVideoLayout(videos: YouTubeVideo[]): void {
+    if (!videos) {
+      console.error("No videos received");
+      return;
+    }
+
+    try {
+      // Update main video (most recent)
+      if (videos.length > 0) {
+        const mainVideo = videos[0];
+        const mainThumbnail =
+          mainVideo.snippet.thumbnails.maxres?.url ||
+          mainVideo.snippet.thumbnails.high?.url ||
+          mainVideo.snippet.thumbnails.medium?.url;
+
+        const mainThumbnailImg = getImageElement(".thumbnail-1");
+        const mainVideoLink = getHTMLElement(
+          ".video-link-1"
+        ) as HTMLAnchorElement;
+        const mainVideoTitle = getHTMLElement(".Latest-Video-Text h3");
+        const mainVideoDesc = getHTMLElement(".Latest-Video-Text p");
+
+        if (mainThumbnailImg && mainThumbnail) {
+          mainThumbnailImg.src = mainThumbnail;
+        }
+        if (mainVideoLink) {
+          mainVideoLink.href = `https://www.youtube.com/watch?v=${mainVideo.id}`;
+        }
+        if (mainVideoTitle) {
+          mainVideoTitle.textContent = mainVideo.snippet.title;
+        }
+        if (mainVideoDesc) {
+          mainVideoDesc.textContent = mainVideo.snippet.description;
+        }
+      }
+
+      // Update videos 1-3 (indexes 1-3 in the array)
+      for (let i = 1; i < 4 && i < videos.length; i++) {
+        const video = videos[i];
+        const thumbnail =
+          video.snippet.thumbnails.maxres?.url ||
+          video.snippet.thumbnails.high?.url ||
+          video.snippet.thumbnails.medium?.url;
+
+        const thumbnailImg = getImageElement(`.thumbnail-${i + 1}`);
+        const videoLink = getHTMLElement(
+          `.video-link-${i + 1}`
+        ) as HTMLAnchorElement;
+        const videoTitle = getHTMLElement(`.Video-${i}-Text h3`);
+
+        if (thumbnailImg && thumbnail) {
+          thumbnailImg.src = thumbnail;
+        }
+        if (videoLink) {
+          videoLink.href = `https://www.youtube.com/watch?v=${video.id}`;
+        }
+        if (videoTitle) {
+          videoTitle.textContent = video.snippet.title;
+        }
+      }
+    } catch (error) {
+      console.error("Error updating layout:", error);
+    }
+  }
+
+  async function fetchYouTubeVideos(): Promise<void> {
+    if (hasRun) {
+      console.log("Fetch already executed");
+      return;
+    }
+    hasRun = true;
+
+    // Check cache first
+    const cachedData = localStorage.getItem("youtubeVideos");
+    const cacheTimestamp = localStorage.getItem("youtubeVideosTimestamp");
+
+    if (cachedData && cacheTimestamp) {
+      const now = new Date().getTime();
+      if (now - parseInt(cacheTimestamp) < CACHE_DURATION) {
+        console.log("Using cached data");
+        const videos: YouTubeVideo[] = JSON.parse(cachedData);
+        updateVideoLayout(videos);
+        return;
+      }
+    }
+
+    try {
+      const response = await fetch("/.netlify/functions/youtube");
+      const data: YouTubeAPIResponse = await response.json();
+
+      if (data.error) {
+        console.error("API Error:", data.message);
+        handleQuotaExceeded();
+        return;
+      }
+
+      if (!data.items || data.items.length === 0) {
+        console.error("No videos found in response");
+        return;
+      }
+
+      const container = getHTMLElement(".yt-videos-container");
+      if (container) {
+        setElementStyle(container, "display", "grid");
+      }
+
+      const formattedVideos: YouTubeVideo[] = data.items.map((item) => ({
+        id: item.snippet.resourceId?.videoId || "",
+        snippet: {
+          title: item.snippet.title,
+          description: item.snippet.description,
+          thumbnails: item.snippet.thumbnails,
+        },
+      }));
+
+      localStorage.setItem("youtubeVideos", JSON.stringify(formattedVideos));
+      localStorage.setItem(
+        "youtubeVideosTimestamp",
+        new Date().getTime().toString()
+      );
+
+      updateVideoLayout(formattedVideos);
+    } catch (error) {
+      console.error("Error fetching YouTube data:", error);
+      handleQuotaExceeded();
+    }
+  }
+
+  function handleQuotaExceeded(): void {
+    const container = getHTMLElement(".yt-videos-container");
+    if (container) {
+      setElementStyle(container, "display", "none");
+
+      const errorMessage = document.createElement("div");
+      errorMessage.className = "quota-error-message";
+      errorMessage.innerHTML = `
+      <div style="text-align: center; padding: 20px; border-radius: 20px;">
+        <h3>Unable to load videos</h3>
+        <p>Please check back later.</p>
+      </div>
+    `;
+
+      if (container.parentNode) {
+        container.parentNode.insertBefore(errorMessage, container);
+      }
+    }
+  }
+
+  // Initialize
+  const initializeLayout = (): void => {
+    fetchYouTubeVideos();
+
+    setTimeout(() => {
+      const elements = [
+        ".Latest-Video-Text h3",
+        ".Latest-Video-Text p",
+        ".Video-1-Text h3",
+        ".Video-2-Text h3",
+        ".Video-3-Text h3",
+      ];
+
+      elements.forEach((selector) => {
+        const element = getHTMLElement(selector);
+        if (element) {
+          addElementClass(element, "clamp-text");
+        }
+      });
+
+      window.dispatchEvent(new Event("resize"));
+    }, 500);
+  };
+
+  // Single event listener
+  const handler = (): void => {
+    initializeLayout();
+    document.removeEventListener("DOMContentLoaded", handler);
+  };
+
+  document.removeEventListener("DOMContentLoaded", handler);
+  document.addEventListener("DOMContentLoaded", handler);
+</script>
+
+<section id="videos" class="videos-section" aria-labelledby="videos-title">
+  <div class="videos-container">
+    <h2 id="videos-title">Latest Videos</h2>
+    <div class="hero-buttons">
+      <a href="https://www.youtube.com/@ctrlaltcookie" target="_blank"
+        ><button class="primary-button">Main Channel</button></a
+      >
+      <a href="https://www.youtube.com/@funnuibunnui" target="_blank"
+        ><button class="secondary-button">Second Channel</button></a
+      >
+    </div>
+
+    <div class="yt-videos-container">
+      <!-- populate with dynamic js api calls -->
+      <div class="Latest-Video-Thumbnail">
+        <a href="#" target="_blank" class="video-link-1">
+          <img src="" alt="Latest Video Thumbnail" class="thumbnail-1" />
+        </a>
+      </div>
+      <div class="Latest-Video-Text">
+        <h3></h3>
+        <p></p>
+      </div>
+      <div class="Video-1-Thumbnail">
+        <a href="#" target="_blank" class="video-link-2">
+          <img src="" alt="Video 1 Thumbnail" class="thumbnail-2" />
+        </a>
+      </div>
+      <div class="Video-1-Text">
+        <h3></h3>
+      </div>
+      <div class="Video-2-Thumbnail">
+        <a href="#" target="_blank" class="video-link-3">
+          <img src="" alt="Video 2 Thumbnail" class="thumbnail-3" />
+        </a>
+      </div>
+      <div class="Video-2-Text">
+        <h3></h3>
+      </div>
+      <div class="Video-3-Thumbnail">
+        <a href="#" target="_blank" class="video-link-4">
+          <img src="" alt="Video 3 Thumbnail" class="thumbnail-4" />
+        </a>
+      </div>
+      <div class="Video-3-Text">
+        <h3></h3>
+      </div>
+    </div>
+  </div>
+</section>
