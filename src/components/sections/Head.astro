@@ -1,0 +1,122 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  canonical?: string;
+  noindex?: boolean;
+  author?: string;
+  keywords?: string[];
+}
+
+const {
+  title, // title is passed as a prop in layout
+  description = "Home of Cookie, the funnui bunnui vtuber. Contains socials, videos and stream info.",
+  image = "/og-image.png",
+  canonical,
+  noindex = false,
+  author = "Cookie",
+  keywords = [
+    "youtuber",
+    "twitch streamer",
+    "funnui bunnui",
+    "vtuber",
+    "ctrlaltcookie",
+    "ctrl alt cookie youtube",
+  ],
+} = Astro.props;
+
+const siteName = "CtrlAltCookie";
+const fullTitle = title === siteName ? title : `${title} | ${siteName}`;
+const currentUrl = canonical || Astro.url.href;
+const imageUrl = new URL(image, Astro.url.origin).href;
+---
+
+<head>
+  <!-- Basic Meta Tags -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="generator" content={Astro.generator} />
+
+  <!-- Title and Description -->
+  <title>{fullTitle}</title>
+  <meta name="description" content={description} />
+
+  <!-- Keywords -->
+  {
+    keywords.length > 0 && (
+      <meta name="keywords" content={keywords.join(", ")} />
+    )
+  }
+
+  <!-- Author -->
+  <meta name="author" content={author} />
+
+  <!-- Canonical URL -->
+  {canonical && <link rel="canonical" href={canonical} />}
+
+  <!-- Robots -->
+  {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+  <!-- Sitemap -->
+  <link rel="sitemap" href="/sitemap-index.xml" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={currentUrl} />
+  <meta property="og:title" content={fullTitle} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content={imageUrl} />
+  <meta property="og:site_name" content={siteName} />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content={currentUrl} />
+  <meta name="twitter:title" content={fullTitle} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={imageUrl} />
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png" />
+
+  <!-- Manifest -->
+  <link rel="manifest" href="/site.webmanifest" />
+
+  <!-- Theme Color -->
+  <meta name="theme-color" content="#c11f1f" />
+  <meta name="msapplication-TileColor" content="#c11f1f" />
+
+  <!-- Preconnect to external domains for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Playpen+Sans:wght@100..800&display=swap"
+  />
+
+  <!-- Theme initialization script (prevents flash) -->
+  <script is:inline>
+    (function () {
+      const savedTheme = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia?.(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      const isDark = savedTheme ? savedTheme === "dark" : prefersDark;
+      if (isDark) {
+        document.documentElement.classList.add("dark");
+      }
+      window.__INITIAL_THEME__ = isDark;
+    })();
+  </script>
+
+  <!-- External Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"
+  ></script>
+  <script src="styles/youtube-script.js" defer></script>
+  <script src="styles/scripts.js" defer></script>
+  <script src="styles/main.js" defer></script>
+  <script src="styles/form.js" defer></script>
+</head>

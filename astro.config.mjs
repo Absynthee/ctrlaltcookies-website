@@ -7,7 +7,7 @@ import react from "@astrojs/react";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://www.project-name.com",
+  site: "https://www.ctrlaltcookie.com",
   integrations: [
     sitemap(),
     // { filter: (page) => page !== '/404', // exclude page from sitemap }
