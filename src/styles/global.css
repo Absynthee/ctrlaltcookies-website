@@ -802,11 +802,6 @@ span.long-name {
   margin: 0 0 0 4%;
 }
 
-/* old style to flip the about image horizontally */
-.about-main-image {
-  /* transform: scaleX(-1); */
-}
-
 .videos-section {
   display: flex;
   flex-direction: column;
