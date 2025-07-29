@@ -1,46 +1,23 @@
-# Astro Starter Kit: Basics
+# blank template instructions
 
-```sh
-npm create astro@latest -- --template basics
-```
+instructions for duplicating new astro project.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+1. run 'npx @astrojs/upgrade'
 
-## 🚀 Project Structure
+2. update project-name in the following files:
 
-Inside of your Astro project, you'll see the following folders and files:
+   - package.json
+   - package-lock.json (x2)
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
-```
+3. update site url in the following files:
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+   - astro.config.mjs
+   - robots.txt
 
-## 🧞 Commands
+4. update content of site.webmanifest
 
-All commands are run from the root of the project, from a terminal:
+5. update assets in /public (favicon, chrome-icons, og-image)
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+6. update global styles
 
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+7. update components and layout as needed

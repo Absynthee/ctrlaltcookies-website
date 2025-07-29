@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://austinspillman.com/sitemap-index.xml
