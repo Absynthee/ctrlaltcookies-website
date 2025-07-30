@@ -6,6 +6,8 @@
     addElementClass,
   } from "@/lib/utils";
 
+  import { applyClampToElements } from "@/lib/scripts";
+
   // Type definitions
   interface VideoThumbnails {
     maxres?: { url: string };
@@ -206,6 +208,8 @@
           addElementClass(element, "clamp-text");
         }
       });
+
+      applyClampToElements();
 
       window.dispatchEvent(new Event("resize"));
     }, 500);

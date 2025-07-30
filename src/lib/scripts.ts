@@ -60,3 +60,5 @@ function applyClampToElements(): void {
   const containers = getHTMLElements(".clamp-text");
   containers.forEach((container) => clampText(container, 4));
 }
+
+export { applyClampToElements };
