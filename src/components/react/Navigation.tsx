@@ -90,7 +90,7 @@ function Navigation({ currentPath }: NavigationProps) {
   return (
     <nav className={`${isVisible ? "nav-visible" : "nav-hidden"}`}>
       <div className="logo">
-        <img src="src/assets/images/slime-bunny.png" alt="Cookie's logo" />
+        <img src="/images/slime-bunny.png" alt="Cookie's logo" />
         <a href="/#">CtrlAltCookie</a>
       </div>
 

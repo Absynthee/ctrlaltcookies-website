@@ -54,22 +54,22 @@
   transition: all 0.5s;
 
   .about-main {
-    background: url(src/assets/images/bg-about-dark.png) center center no-repeat;
+    background: url(/images/bg-about-dark.png) center center no-repeat;
     background-size: contain;
   }
 
   .hero-stats {
-    background: url(src/assets/images/bg-2-dark.png) center center no-repeat;
+    background: url(/images/bg-2-dark.png) center center no-repeat;
     background-size: contain;
   }
 
   .community-container {
-    background: url(src/assets/images/bg-1-dark.png) center center no-repeat;
+    background: url(/images/bg-1-dark.png) center center no-repeat;
     background-size: contain;
   }
 
   footer {
-    background: url(src/assets/images/bg-1-dark.png) top center;
+    background: url(/images/bg-1-dark.png) top center;
   }
 }
 
@@ -437,7 +437,7 @@ main {
   align-self: center;
   width: 100%;
   max-width: 1920px;
-  background: url(src/assets/images/bg-2.png) center center no-repeat;
+  background: url(/images/bg-2.png) center center no-repeat;
   height: 300px;
   background-size: contain;
 }
@@ -794,7 +794,7 @@ span.long-name {
 }
 
 .about-main {
-  background: url(src/assets/images/bg-about.png) center center no-repeat;
+  background: url(/images/bg-about.png) center center no-repeat;
 }
 
 .about-main-text {
@@ -998,7 +998,7 @@ span.long-name {
 }
 
 .community-container {
-  background: url(src/assets/images/bg-1.png) center center no-repeat;
+  background: url(/images/bg-1.png) center center no-repeat;
   background-size: contain;
   overflow: hidden;
 }
@@ -1068,7 +1068,7 @@ span.long-name {
 /* contact form */
 
 footer {
-  background: url(src/assets/images/bg-1.png) top center;
+  background: url(/images/bg-1.png) top center;
   width: 100%;
   height: auto;
   text-align: center;
