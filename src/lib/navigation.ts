@@ -93,7 +93,7 @@ const socialLinks: SocialItem[] = [
   },
   {
     label: "Bluesky",
-    path: "https://bsky.app/profile/ctrlaltcookie.com",
+    path: "https://bsky.app/profile/ctrlaltcookie.bsky.social",
     icon: "bluesky",
     ariaLabel: "Connect with me on Bluesky",
   },
