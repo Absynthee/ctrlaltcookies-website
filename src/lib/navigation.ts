@@ -40,11 +40,11 @@ const mainLinks: NavItem[] = [
     path: "/#contact",
     ariaLabel: "Contact me",
   },
-  {
-    label: "Fan Art",
-    path: "/fan-art",
-    ariaLabel: "View fan art",
-  },
+  // {
+  //   label: "Fan Art",
+  //   path: "/fan-art",
+  //   ariaLabel: "View fan art",
+  // },
 ];
 
 // Footer navigation links
@@ -64,11 +64,11 @@ const footerLinks: FooterNavItem[] = [
     path: "/#contact",
     ariaLabel: "Contact me",
   },
-  {
-    label: "Fan Art",
-    path: "/fan-art",
-    ariaLabel: "View fan art",
-  },
+  // {
+  //   label: "Fan Art",
+  //   path: "/fan-art",
+  //   ariaLabel: "View fan art",
+  // },
 ];
 
 // Footer social links (@lucide/astro icons)
@@ -85,12 +85,12 @@ const socialLinks: SocialItem[] = [
     icon: "twitch",
     ariaLabel: "Watch me live on Twitch",
   },
-  // {
-  //   label: "Discord",
-  //   path: "https://behance.net/austinspillman",
-  //   icon: "behance",
-  //   ariaLabel: "Join my Discord server",
-  // },
+  {
+    label: "Discord",
+    path: "https://discord.gg/krc254Yqja",
+    icon: "discord",
+    ariaLabel: "Join my Discord server",
+  },
   {
     label: "Bluesky",
     path: "https://bsky.app/profile/ctrlaltcookie.com",
